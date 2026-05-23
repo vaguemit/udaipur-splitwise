@@ -23,7 +23,10 @@
       <div class="header-top">
         <div class="app-logo">
           <img src="icons/icon.svg" alt="Udaipur Splitwise Logo">
-          <span class="app-title">udaipur splitwise</span>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <span class="app-title">udaipur splitwise</span>
+            <span id="connection-status" class="connection-status-badge" style="display: none; font-size: 0.65rem; font-weight: 700; color: var(--color-grey-dark); text-transform: uppercase; letter-spacing: 0.8px;">⚡ Offline Mode</span>
+          </div>
         </div>
         <div class="group-badge" id="active-group-badge" onclick="appController.openGroupSwitcher()">
           Udaipur Trip ☀️

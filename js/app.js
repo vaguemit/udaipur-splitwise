@@ -18,8 +18,20 @@ class AppController {
     document.getElementById('exp-date').value = today;
     document.getElementById('settle-date').value = today;
 
+    // Listen for network status changes
+    window.addEventListener('online', () => this.updateOnlineStatus());
+    window.addEventListener('offline', () => this.updateOnlineStatus());
+    this.updateOnlineStatus();
+
     // Initial render
     this.renderAll();
+  }
+
+  updateOnlineStatus() {
+    const status = document.getElementById('connection-status');
+    if (status) {
+      status.style.display = navigator.onLine ? 'none' : 'inline-block';
+    }
   }
 
   // --- TAB NAVIGATION ---
