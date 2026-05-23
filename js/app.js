@@ -87,6 +87,14 @@ class AppController {
     }
   }
 
+  openAddUserModal() {
+    this.openModal('modal-add-user');
+  }
+
+  openAddExpenseModal() {
+    this.openModal('modal-add-expense');
+  }
+
   // --- RENDER ROUTER ---
   renderAll() {
     const groupId = window.store.getActiveGroupId();
