@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Rounded Background -->
+  <rect width="512" height="512" rx="128" fill="#1A1A1A"/>
+  
+  <!-- Sleek Minimalist Geometric Split Shape -->
+  <g transform="translate(256, 256)">
+    <!-- Top Part -->
+    <path d="M -10 -20 L -10 -150 A 150 150 0 0 1 120 -90 L 10 -20 Z" fill="#FDFBF7"/>
+    <!-- Right Part -->
+    <path d="M 20 5 L 130 -70 A 150 150 0 0 1 110 110 L 20 40 Z" fill="#DDD9D0"/>
+    <!-- Left Part -->
+    <path d="M -15 20 L -110 110 A 150 150 0 0 1 -130 -70 L -20 5 Z" fill="#8E8A82"/>
+  </g>
+  
+  <!-- Outer Ring Accent -->
+  <circle cx="256" cy="256" r="190" fill="none" stroke="#FDFBF7" stroke-width="6" opacity="0.15"/>
+</svg>
