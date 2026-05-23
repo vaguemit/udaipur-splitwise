@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Udaipur Splitwise</title>
+  <!-- SEO & Social Meta -->
+  <meta name="description" content="A premium, local-only expense splitting application designed for single-phone group cost tracking.">
+  <meta name="theme-color" content="#1A1A1A">
+  <!-- PWA & Mobile Web Capabilities -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- HEADER -->
+    <header>
+      <div class="header-top">
+        <div class="app-logo">
+          <img src="icons/icon.svg" alt="Udaipur Splitwise Logo">
+          <span class="app-title">udaipur splitwise</span>
+        </div>
+        <div class="group-badge" id="active-group-badge" onclick="appController.openGroupSwitcher()">
+          Udaipur Trip ☀️
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN VIEWS PORT -->
+    <main>
+      
+      <!-- 1. DASHBOARD PANEL -->
+      <section id="view-dashboard" class="view-panel active">
+        <!-- Hero Summary -->
+        <div class="hero-balance">
+          <span class="hero-label" id="dashboard-hero-label">Total Expense</span>
+          <span class="hero-amount" id="dashboard-hero-amount">₹0.00</span>
+          <div class="hero-actions">
+            <button class="btn btn-hero btn-hero-primary" onclick="appController.openAddExpenseModal()">
+              Add Expense
+            </button>
+            <button class="btn btn-hero btn-hero-secondary" onclick="appController.switchToTab('balances')">
+              Settle Debts
+            </button>
+          </div>
+        </div>
+
+        <!-- Members Balance Section -->
+        <div class="card">
+          <div class="card-title-row">
+            <div>
+              <h2>group members</h2>
+              <span class="subtitle" id="member-count-subtitle">0 members in group</span>
+            </div>
+            <button class="btn btn-secondary btn-icon-only" onclick="appController.openAddUserModal()" title="Add Member">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+            </button>
+          </div>
+          
+          <div class="list-container" id="members-balance-list">
+            <!-- Rendered dynamically by app.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. EXPENSES HISTORIC LOG -->
+      <section id="view-expenses" class="view-panel">
+        <div class="card">
+          <div class="card-title-row">
+            <div>
+              <h2>transaction log</h2>
+              <span class="subtitle">History of all cost entries</span>
+            </div>
+          </div>
+          
+          <!-- Filter search bar -->
+          <div class="form-group" style="margin-bottom: var(--spacing-sm);">
+            <input type="text" id="expense-search-input" class="input-field" placeholder="🔍 Search expenses..." oninput="appController.renderExpenses()">
+          </div>
+
+          <div class="list-container" id="expenses-log-list">
+            <!-- Rendered dynamically by app.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. BALANCES & SIMPLIFIED DEBTS -->
+      <section id="view-balances" class="view-panel">
+        <div class="card">
+          <div class="card-title-row">
+            <div>
+              <h2>suggested settlements</h2>
+              <span class="subtitle">Simplified minimum-payment paths</span>
+            </div>
+          </div>
+          
+          <div class="list-container" id="debts-simplified-list">
+            <!-- Rendered dynamically by app.js -->
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>all settlements</h2>
+          <span class="subtitle" style="margin-top: calc(-1 * var(--spacing-xs)); margin-bottom: var(--spacing-xs);">Log of recorded payments</span>
+          <div class="list-container" id="settlements-log-list">
+            <!-- Rendered dynamically by app.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. GROUPS DASHBOARD -->
+      <section id="view-groups" class="view-panel">
+        <div class="card">
+          <h2>create new group</h2>
+          <form id="create-group-form" onsubmit="appController.handleCreateGroup(event)" class="list-container" style="gap: var(--spacing-md);">
+            <div class="form-group">
+              <label for="new-group-name">Group Name</label>
+              <input type="text" id="new-group-name" class="input-field" placeholder="e.g., Udaipur Trip ☀️" required>
+            </div>
+            <div class="form-group">
+              <label for="new-group-desc">Description (Optional)</label>
+              <input type="text" id="new-group-desc" class="input-field" placeholder="e.g., Roommates or Trip details">
+            </div>
+            <button type="submit" class="btn btn-primary">Create Group</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>switch group</h2>
+          <span class="subtitle">Select group to view and track</span>
+          <div class="list-container" id="groups-list">
+            <!-- Rendered dynamically by app.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. SETTINGS PANEL -->
+      <section id="view-settings" class="view-panel">
+        <!-- Portability Options -->
+        <div class="card">
+          <h2>export data</h2>
+          <span class="subtitle">Share or download transaction logs</span>
+          
+          <div class="settings-section">
+            <div class="settings-btn-group">
+              <button class="btn btn-secondary" onclick="appController.exportToWhatsApp()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+                Copy WhatsApp Text Summary
+              </button>
+              <button class="btn btn-secondary" onclick="appController.downloadCSV()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download CSV Transaction Log
+              </button>
+              <button class="btn btn-secondary" onclick="appController.downloadBackupJSON()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 21 12 16 7 21"/><line x1="12" y1="12" x2="12" y2="21"/></svg>
+                Download full JSON Backup
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>import data</h2>
+          <span class="subtitle">Restore from JSON backup file</span>
+          
+          <div class="settings-section">
+            <div class="form-group">
+              <input type="file" id="import-json-file" accept=".json" class="input-field" style="padding: 10px;" onchange="appController.importBackupJSON(event)">
+            </div>
+          </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="card" style="border-color: rgba(143, 92, 92, 0.3);">
+          <h2 style="color: var(--color-negative);">danger zone</h2>
+          <span class="subtitle">Resetting deletes all local data permanently</span>
+          
+          <div class="settings-section">
+            <button class="btn btn-danger" onclick="appController.handleResetApp()">
+              Reset App (Delete Everything)
+            </button>
+            
+            <button class="btn btn-danger" onclick="appController.handleDeleteCurrentGroup()" id="delete-current-group-btn">
+              Delete Current Group Only
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- BOTTOM APP NAVIGATION BAR -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" onclick="appController.switchToTab('dashboard')" id="nav-dashboard">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        Dashboard
+      </button>
+      
+      <button class="nav-item" onclick="appController.switchToTab('expenses')" id="nav-expenses">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Expenses
+      </button>
+
+      <div class="nav-item nav-item-center">
+        <button class="add-btn-floating" onclick="appController.openAddExpenseModal()" title="Add Expense">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+
+      <button class="nav-item" onclick="appController.switchToTab('balances')" id="nav-balances">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M17 11l2 2 4-4"/></svg>
+        Settlement
+      </button>
+
+      <button class="nav-item" onclick="appController.switchToTab('settings')" id="nav-settings">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+    </nav>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- 1. GROUP SWITCHER MODAL -->
+    <div id="modal-group-switcher" class="modal-overlay" onclick="appController.closeModal('modal-group-switcher')">
+      <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <span class="modal-title">switch active group</span>
+          <button class="btn-close" onclick="appController.closeModal('modal-group-switcher')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="list-container" id="group-switcher-list">
+          <!-- Populated dynamically -->
+        </div>
+        <button class="btn btn-primary" onclick="appController.switchToTab('groups'); appController.closeModal('modal-group-switcher');">
+          Create New Group
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. ADD USER MODAL -->
+    <div id="modal-add-user" class="modal-overlay" onclick="appController.closeModal('modal-add-user')">
+      <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <span class="modal-title">add new member</span>
+          <button class="btn-close" onclick="appController.closeModal('modal-add-user')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <form id="add-user-form" onsubmit="appController.handleAddUser(event)" class="list-container" style="gap: var(--spacing-md);">
+          <div class="form-group">
+            <label for="new-user-name">Member Name</label>
+            <input type="text" id="new-user-name" class="input-field" placeholder="e.g., Aarav" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Add Member</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 3. ADD EXPENSE MODAL -->
+    <div id="modal-add-expense" class="modal-overlay" onclick="appController.closeModal('modal-add-expense')">
+      <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <span class="modal-title">log new expense</span>
+          <button class="btn-close" onclick="appController.closeModal('modal-add-expense')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        
+        <form id="add-expense-form" onsubmit="appController.handleAddExpense(event)" class="list-container" style="gap: var(--spacing-md);">
+          <div class="form-group">
+            <label for="exp-desc">Description</label>
+            <input type="text" id="exp-desc" class="input-field" placeholder="e.g., Udaipur Palace Entry" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="exp-amount">Total Amount</label>
+            <div class="input-prefix">
+              <span class="input-prefix-symbol">₹</span>
+              <input type="number" step="0.01" id="exp-amount" class="input-field" placeholder="0.00" oninput="appController.handleExpenseAmountInput()" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="exp-paid-by">Paid By</label>
+            <select id="exp-paid-by" class="input-field" required>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
+          <!-- Split Control -->
+          <div class="form-group">
+            <label>Split Method</label>
+            <div class="split-options">
+              <button type="button" class="split-tab active" id="split-tab-equal" onclick="appController.setSplitMethod('equal')">Split Equally</button>
+              <button type="button" class="split-tab" id="split-tab-custom" onclick="appController.setSplitMethod('custom')">Split Custom</button>
+            </div>
+            
+            <div class="split-members-list" id="expense-split-members">
+              <!-- Populated dynamically with checkboxes/inputs -->
+            </div>
+          </div>
+
+          <!-- Extra Fields -->
+          <div class="form-group">
+            <label>Category</label>
+            <div class="category-grid">
+              <div class="category-option active" data-category="Food" onclick="appController.setCategory(this)">
+                <span class="category-icon">🍔</span>
+                <span>Food</span>
+              </div>
+              <div class="category-option" data-category="Stay" onclick="appController.setCategory(this)">
+                <span class="category-icon">🏨</span>
+                <span>Stay</span>
+              </div>
+              <div class="category-option" data-category="Transport" onclick="appController.setCategory(this)">
+                <span class="category-icon">🚕</span>
+                <span>Transport</span>
+              </div>
+              <div class="category-option" data-category="Tickets" onclick="appController.setCategory(this)">
+                <span class="category-icon">🎟️</span>
+                <span>Tickets</span>
+              </div>
+              <div class="category-option" data-category="Shopping" onclick="appController.setCategory(this)">
+                <span class="category-icon">🛍️</span>
+                <span>Shopping</span>
+              </div>
+              <div class="category-option" data-category="Other" onclick="appController.setCategory(this)">
+                <span class="category-icon">📦</span>
+                <span>Other</span>
+              </div>
+            </div>
+            <input type="hidden" id="exp-category" value="Food">
+          </div>
+
+          <div class="form-group">
+            <label for="exp-date">Date</label>
+            <input type="date" id="exp-date" class="input-field">
+          </div>
+          
+          <button type="submit" class="btn btn-primary">Save Expense</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 4. SETTLE UP MODAL -->
+    <div id="modal-settle-up" class="modal-overlay" onclick="appController.closeModal('modal-settle-up')">
+      <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <span class="modal-title">record settlement payment</span>
+          <button class="btn-close" onclick="appController.closeModal('modal-settle-up')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        
+        <form id="settle-up-form" onsubmit="appController.handleRecordSettlement(event)" class="list-container" style="gap: var(--spacing-md);">
+          <div class="form-group">
+            <label for="settle-from">Who Paid (Sender)</label>
+            <select id="settle-from" class="input-field" onchange="appController.handleSettlePayerChange()" required>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="settle-to">Who Received (Recipient)</label>
+            <select id="settle-to" class="input-field" required>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="settle-amount">Payment Amount</label>
+            <div class="input-prefix">
+              <span class="input-prefix-symbol">₹</span>
+              <input type="number" step="0.01" id="settle-amount" class="input-field" placeholder="0.00" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="settle-date">Date</label>
+            <input type="date" id="settle-date" class="input-field">
+          </div>
+          
+          <button type="submit" class="btn btn-primary">Record Payment</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Javascript Modules -->
+  <script src="js/store.js"></script>
+  <script src="js/splitwise.js"></script>
+  <script src="js/app.js"></script>
+  
+  <!-- Register PWA Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('Service Worker registered successfully!', reg.scope))
+          .catch(err => console.log('Service Worker registration failed:', err));
+      });
+    }
+  </script>
+</body>
+</html>
